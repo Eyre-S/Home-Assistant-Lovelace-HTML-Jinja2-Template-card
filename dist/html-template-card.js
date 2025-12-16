@@ -130,11 +130,13 @@ class HtmlTemplateCardEditor extends HTMLElement {
         this._render();
     }
     
-    _updateConfig() {
+    _updateConfig(newConfig) {
+        this._config = { ...this._config, ...newConfig };
         this.dispatchEvent(new CustomEvent("config-changed", { detail: { config: this._config } }));
     }
     
-    _updateConfigEntities() {
+    _updateConfigEntities(newConfigEntities) {
+        this._configEntities = newConfigEntities;
         const newEntities = this._configEntities.map(x => x.entity);
         this._config = { ...this._config, entities: newEntities };
         this._updateConfig();
@@ -197,8 +199,7 @@ class HtmlTemplateCardEditor extends HTMLElement {
         haForm.computeLabel = this._computeLabel.bind(this);
         haForm.computeHelper = this._computeHelper.bind(this);
         haForm.addEventListener("value-changed", (e) => {
-            this._config = e.detail.value;
-            this._updateConfig();
+            this._updateConfig(e.detail.value);
         })
         this.appendChild(haForm);
         
@@ -209,8 +210,7 @@ class HtmlTemplateCardEditor extends HTMLElement {
         // by customize label, it can be "Entities" without "(required)" suffix
         haEntitiesForm.label = this._computeEntitiesLabel();
         haEntitiesForm.addEventListener("entities-changed", (e) => {
-            this._configEntities = e.detail.entities;
-            this._updateConfigEntities();
+            this._updateConfigEntities(e.detail.entities);
             this._rendered = false;
             this._render();
         })
