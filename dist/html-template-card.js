@@ -155,25 +155,21 @@ class HtmlTemplateCardEditor extends HTMLElement {
             name: "",
             schema: [
                 {
-                    name: "always_update",
-                    selector: { boolean: {} },
-                    description: "Enables refreshing the card with every change of entity."
-                },
-                {
                     name: "picture_elements_mode",
                     selector: { boolean: {} },
-                    description: "Enables picture-elements mode."
                 },
                 {
                     name: "ignore_line_breaks",
                     selector: { boolean: {} },
-                    description: "Disables changing line breaks to </br> tags."
                 },
                 {
                     name: "do_not_parse",
                     selector: { boolean: {} },
-                    description: "Disables template parsing."
-                }
+                },
+                {
+                    name: "always_update",
+                    selector: { boolean: {} },
+                },
             ]
         }
     ]
@@ -199,6 +195,7 @@ class HtmlTemplateCardEditor extends HTMLElement {
         haForm.data = this._config;
         haForm.schema = this.SCHEMA;
         haForm.computeLabel = this._computeLabel.bind(this);
+        haForm.computeHelper = this._computeHelper.bind(this);
         haForm.addEventListener("value-changed", (e) => {
             this._config = e.detail.value;
             this._updateConfig();
@@ -208,6 +205,9 @@ class HtmlTemplateCardEditor extends HTMLElement {
         const haEntitiesForm = document.createElement("hui-entity-editor");
         haEntitiesForm.hass = this._hass;
         haEntitiesForm.entities = this._configEntities;
+        // default is "Entities (required)"
+        // by customize label, it can be "Entities" without "(required)" suffix
+        haEntitiesForm.label = this._computeEntitiesLabel();
         haEntitiesForm.addEventListener("entities-changed", (e) => {
             this._configEntities = e.detail.entities;
             this._updateConfigEntities();
@@ -221,7 +221,36 @@ class HtmlTemplateCardEditor extends HTMLElement {
     }
     
     _computeLabel (schema) {
+        switch (schema.name) {
+            case "ignore_line_breaks":
+                return "Ignore Line Breaks";
+            case "do_not_parse":
+                return "Do Not Parse Template";
+            case "always_update":
+                return "Always Update";
+            case "picture_elements_mode":
+                return "Picture Elements Mode";
+            default:
+        }
         return this._hass.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`) || schema.name;
+    }
+    
+    _computeEntitiesLabel () {
+        return this._hass.localize(`ui.panel.lovelace.editor.card.generic.entities`)
+    }
+    
+    _computeHelper (schema) {
+        switch (schema.name) {
+            case "ignore_line_breaks":
+                return "Disables changing line breaks to </br> tags";
+            case "do_not_parse":
+                return "Disables template parsing";
+            case "always_update":
+                return "Enables refreshing the card with every change of entity";
+            case "picture_elements_mode":
+                return "Enables picture-elements mode";
+        }
+        return undefined;
     }
     
 }
